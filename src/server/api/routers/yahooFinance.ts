@@ -10,7 +10,7 @@ type QuoteInput = {
 
 export const yahooFinanceRouter = createTRPCRouter({
   quote: publicProcedure.query(async ({ input }: QuoteInput = {}) => {
-    const symbol = input! as string;
+    const symbol = input as string;
 
     if (!symbol) {
       // Handle the case where symbol is undefined
