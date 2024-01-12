@@ -120,8 +120,8 @@ export const getServerSideProps: GetServerSideProps = async () => {
         askPrice,
       },
     };
-  } catch (error: any) {
-    console.error("Error fetching stock quote:", error.message);
+  } catch (err) {
+    console.error("Error fetching stock quote");
 
     return {
       props: {

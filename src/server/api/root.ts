@@ -1,7 +1,6 @@
 import { createTRPCRouter } from "~/server/api/trpc";
 
 import { postsRouter } from "~/server/api/routers/posts";
-import { yahooFinanceRouter } from "./routers/yahooFinance";
 
 /**
  * This is the primary router for your server.
@@ -10,7 +9,6 @@ import { yahooFinanceRouter } from "./routers/yahooFinance";
  */
 export const appRouter = createTRPCRouter({
   posts: postsRouter,
-  yahooFinance: yahooFinanceRouter,
 });
 
 // export type definition of API
