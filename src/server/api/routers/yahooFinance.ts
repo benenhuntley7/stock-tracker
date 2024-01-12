@@ -1,7 +1,7 @@
 // server/api/trpc.ts
 
 import yahooFinance from "yahoo-finance2";
-import { z } from "zod";
+//import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
 type QuoteInput = {
