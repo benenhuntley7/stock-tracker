@@ -8,6 +8,8 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
 import { LoadingPage } from "~/components/loadingSpinner";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import yahooFinance from "yahoo-finance2";
 dayjs.extend(relativeTime);
 
 type PostWithUser = RouterOutputs["posts"]["getAll"][number];
@@ -100,13 +102,44 @@ const Feed = () => {
   );
 };
 
-export default function Home() {
+type StockQuote = {
+  // Define the properties you expect from the stock quote object
+  // For example:
+  symbol: string;
+  price: number;
+  // Add other properties as needed
+};
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  try {
+    const quote = await yahooFinance.quote("SYI.AX");
+    const askPrice = quote.regularMarketPrice;
+
+    return {
+      props: {
+        askPrice,
+      },
+    };
+  } catch (error: any) {
+    console.error("Error fetching stock quote:", error.message);
+
+    return {
+      props: {
+        askPrice: null,
+      },
+    };
+  }
+};
+
+type HomeProps = {
+  askPrice: number | null; // Adjust the type based on the actual type of askPrice
+};
+
+export default function Home({ askPrice }: HomeProps) {
   const { isLoaded: userLoaded, isSignedIn } = useUser();
 
   // Start fetching asap to cache
   api.posts.getAll.useQuery();
-
-  // const { quote } = api.yahooFinance.quote("SYI:AX").run();
 
   // Return empty div if both aren't loaded since user tends to load faster
   if (!userLoaded) return <div />;
@@ -119,6 +152,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex h-screen justify-center">
+        <div>{askPrice}</div>
         <div className="w-full border-x border-slate-400 md:max-w-2xl">
           <div className="flex justify-between border-b border-slate-400 bg-slate-800 p-4">
             <div className="flex items-center">
