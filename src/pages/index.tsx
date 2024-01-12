@@ -102,27 +102,38 @@ const Feed = () => {
   );
 };
 
-type StockQuote = {
-  // Define the properties you expect from the stock quote object
-  // For example:
-  symbol: string;
-  price: number;
-  // Add other properties as needed
-};
+async function getQuote(symbol: string) {
+  try {
+    const quote = await yahooFinance.quote(symbol);
+    const askPrice = quote.regularMarketPrice;
+
+    return {
+      askPrice,
+    };
+  } catch (err) {
+    console.error("Error fetching stock quote");
+
+    return {
+      askPrice: null,
+    };
+  }
+}
 
 export const getServerSideProps: GetServerSideProps = async () => {
   try {
-    const quote = await yahooFinance.quote("SYI.AX");
-    const askPrice = quote.regularMarketPrice;
+    const quote = await getQuote("SYI.AX");
+    let askPrice: number | string | null = null;
 
+    if (quote.askPrice !== null && quote.askPrice !== undefined) {
+      askPrice = quote.askPrice.toFixed(2);
+    }
+    console.log(`Ask price: ${quote.askPrice}`);
     return {
       props: {
         askPrice,
       },
     };
   } catch (err) {
-    console.error("Error fetching stock quote");
-
     return {
       props: {
         askPrice: null,
@@ -152,7 +163,6 @@ export default function Home({ askPrice }: HomeProps) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex h-screen justify-center">
-        <div>{askPrice}</div>
         <div className="w-full border-x border-slate-400 md:max-w-2xl">
           <div className="flex justify-between border-b border-slate-400 bg-slate-800 p-4">
             <div className="flex items-center">
@@ -166,6 +176,7 @@ export default function Home({ askPrice }: HomeProps) {
           </div>
           {isSignedIn && <CreatePostWizard />}
           <Feed />
+          <div>SYI Ask Price:${askPrice}</div>
         </div>
       </main>
     </>
