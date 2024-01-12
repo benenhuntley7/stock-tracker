@@ -55,7 +55,7 @@ const PostView = (props: PostWithUser) => {
           <span className="px-2 font-thin">·</span>
           <span>{dayjs(createdAt).fromNow()}</span>
         </div>
-        <span>{content}</span>
+        <span className="text-xl">{content}</span>
       </div>
     </div>
   );
@@ -87,7 +87,7 @@ const CreatePostWizard = () => {
 const Feed = () => {
   const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
 
-  if (postsLoading) return <div />;
+  if (postsLoading) return <LoadingPage />;
 
   if (!data) return <div>Something went wrong</div>;
 
