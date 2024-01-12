@@ -84,14 +84,32 @@ const CreatePostWizard = () => {
   );
 };
 
-export default function Home() {
-  const user = useUser();
+const Feed = () => {
+  const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
 
-  const { data, isLoading } = api.posts.getAll.useQuery();
+  if (postsLoading) return <div />;
+
+  if (!data) return <div>Something went wrong</div>;
+
+  return (
+    <div className="flex flex-col">
+      {data.map((fullPost: PostWithUser) => (
+        <PostView {...fullPost} key={fullPost.id} />
+      ))}
+    </div>
+  );
+};
+
+export default function Home() {
+  const { isLoaded: userLoaded, isSignedIn } = useUser();
+
+  // Start fetching asap to cache
+  api.posts.getAll.useQuery();
+
   // const { quote } = api.yahooFinance.quote("SYI:AX").run();
 
-  if (isLoading) return <LoadingPage />;
-  if (!data) return <div>Something went wrong</div>;
+  // Return empty div if both aren't loaded since user tends to load faster
+  if (!userLoaded) return <div />;
 
   return (
     <>
@@ -109,15 +127,11 @@ export default function Home() {
             </div>
             <div className="flex items-center">
               {/* Right Side Content */}
-              {user.isSignedIn ? <SignOutButton /> : <SignInButton />}
+              {isSignedIn ? <SignOutButton /> : <SignInButton />}
             </div>
           </div>
-          {user.isSignedIn && <CreatePostWizard />}
-          <div className="flex flex-col">
-            {data?.map((fullPost) => (
-              <PostView {...fullPost} key={fullPost.id} />
-            ))}
-          </div>
+          {isSignedIn && <CreatePostWizard />}
+          <Feed />
         </div>
       </main>
     </>
