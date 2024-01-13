@@ -12,11 +12,21 @@ generator client {
 }
 
 model Post {
-    id          String      @id @default(cuid())
-    createdAt   DateTime    @default(now())
-    updatedAt   DateTime    @updatedAt
-    content     String      @db.VarChar(255)
-    authorId    String
+  id          String      @id @default(cuid())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  content     String      @db.VarChar(255)
+  authorId    String
 
-    @@index([authorId])
+  @@index([authorId])
+}
+
+model Stock {
+  id              String      @id @default(cuid())
+  stockCode       String
+  purchasedAt     DateTime
+  purchasePrice   Float
+  userId          String
+
+  @@index([userId])
 }

@@ -36,7 +36,7 @@ const purchases: Purchase[] = [
   },
   {
     id: 2,
-    stock: "SYI.AX",
+    stock: "VAS.AX",
     purchaseDate: "2022-02-01",
     purchaseCost: 50,
     purchaseQty: 20,
@@ -69,7 +69,7 @@ const PostView = (props: PostWithUser) => {
 
 const CreatePostWizard = () => {
   const { user } = useUser();
-  console.log(user?.id);
+  //console.log(user?.id);
 
   if (!user) return null;
 
@@ -108,11 +108,7 @@ const Feed = () => {
 
 export const getServerSideProps: GetServerSideProps = async () => {
   try {
-    const symbols = [
-      "SYI.AX",
-      "NDQ.AX",
-      "VAS.AX" /* Add more symbols as needed */,
-    ];
+    const symbols = purchases.map((purchase) => purchase.stock);
     const { result } = await getQuote(symbols);
 
     const askPrices = result!.map(
