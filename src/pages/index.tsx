@@ -1,16 +1,20 @@
 import Head from "next/head";
+
 import { SignInButton, SignOutButton, UserButton } from "@clerk/nextjs";
 import { useUser } from "@clerk/nextjs";
 
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
+
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import Image from "next/image";
-import { LoadingPage } from "~/components/loadingSpinner";
-import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import yahooFinance from "yahoo-finance2";
 dayjs.extend(relativeTime);
+
+import Image from "next/image";
+import { GetServerSideProps } from "next";
+
+import { LoadingPage } from "~/components/loadingSpinner";
+import { getQuote } from "~/helperFunctions/yahooFinance";
 
 type PostWithUser = RouterOutputs["posts"]["getAll"][number];
 
@@ -102,51 +106,48 @@ const Feed = () => {
   );
 };
 
-async function getQuote(symbol: string) {
-  try {
-    const quote = await yahooFinance.quote(symbol);
-    const askPrice = quote.regularMarketPrice;
-
-    return {
-      askPrice,
-    };
-  } catch (err) {
-    console.error("Error fetching stock quote");
-
-    return {
-      askPrice: null,
-    };
-  }
-}
-
 export const getServerSideProps: GetServerSideProps = async () => {
   try {
-    const quote = await getQuote("SYI.AX");
-    let askPrice: number | string | null = null;
+    const symbols = [
+      "SYI.AX",
+      "NDQ.AX",
+      "VAS.AX" /* Add more symbols as needed */,
+    ];
+    const { result } = await getQuote(symbols);
 
-    if (quote.askPrice !== null && quote.askPrice !== undefined) {
-      askPrice = quote.askPrice.toFixed(2);
-    }
-    console.log(`Ask price: ${quote.askPrice}`);
+    const askPrices = result!.map(
+      ({ symbol, longName, regularMarketPrice }) => ({
+        symbol,
+        longName: longName ?? "",
+        regularMarketPrice: regularMarketPrice ?? 0,
+      }),
+    );
+
     return {
       props: {
-        askPrice,
+        askPrices,
       },
     };
   } catch (err) {
+    console.error("Error fetching stock quotes:", err);
+
     return {
       props: {
-        askPrice: null,
+        askPrices: [],
       },
     };
   }
 };
 
 type HomeProps = {
-  askPrice: number | null; // Adjust the type based on the actual type of askPrice
+  askPrices: Array<{
+    symbol: string;
+    longName: string;
+    regularMarketPrice: number | null;
+  }>;
 };
 
-export default function Home({ askPrice }: HomeProps) {
+export default function Home({ askPrices }: HomeProps) {
   const { isLoaded: userLoaded, isSignedIn } = useUser();
 
   // Start fetching asap to cache
@@ -176,7 +177,13 @@ export default function Home({ askPrice }: HomeProps) {
           </div>
           {isSignedIn && <CreatePostWizard />}
           <Feed />
-          <div>SYI Ask Price:${askPrice}</div>
+          <div className="mt-4">
+            {askPrices.map((askPrice) => (
+              <div key={askPrice.symbol}>
+                {askPrice.longName}: ${askPrice.regularMarketPrice?.toFixed(2)}
+              </div>
+            ))}
+          </div>
         </div>
       </main>
     </>
