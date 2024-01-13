@@ -5,12 +5,12 @@ export const stocksRouter = createTRPCRouter({
     const userId = ctx.userId;
 
     if (!userId) {
-      // Handle the case when the user is not authenticated
       throw new Error("User not authenticated");
     }
 
     const stocks = await ctx.db.stock.findMany({ where: { userId: userId } });
+    // You can add more logic to transform or filter stocks as needed
 
-    return stocks;
+    return { stocks };
   }),
 });

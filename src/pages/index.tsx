@@ -130,6 +130,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
     return {
       props: {
         askPrices: [],
+        stocks: [],
       },
     };
   }
@@ -148,6 +149,8 @@ export default function Home({ askPrices }: HomeProps) {
 
   // Start fetching asap to cache
   api.posts.getAll.useQuery();
+  const { data: stocks, isLoading: stocksLoading } =
+    api.stocks.getAll.useQuery();
 
   // Return empty div if both aren't loaded since user tends to load faster
   if (!userLoaded) return <div />;
