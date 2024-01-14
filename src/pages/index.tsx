@@ -81,60 +81,7 @@ const Feed = () => {
   );
 };
 
-type Stock = {
-  symbol: string;
-  longName: string;
-  regularMarketPrice: number;
-};
-
-type HomeProps = {
-  askPrices: Stock[];
-};
-
-const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
-  try {
-    const stocksQuery = api.stocks.getAll.useQuery();
-    const stocks = stocksQuery.data?.stocks ?? [];
-
-    if (Array.isArray(stocks)) {
-      const symbols = stocks.map((stock) => stock.symbol) ?? [];
-      const { result } = await getQuote(symbols);
-
-      const askPrices: Stock[] = result!.map(
-        ({ symbol, longName, regularMarketPrice }) => ({
-          symbol,
-          longName: longName ?? "",
-          regularMarketPrice: regularMarketPrice ?? 0,
-        }),
-      );
-
-      return {
-        props: {
-          askPrices,
-        },
-      };
-    } else {
-      console.error("Stocks data is not an array:", stocksQuery.data);
-    }
-
-    // If there's an error or stocks are not an array, return an empty array for askPrices
-    return {
-      props: {
-        askPrices: [],
-      },
-    };
-  } catch (err) {
-    console.error("Error fetching stock quotes:", err);
-
-    return {
-      props: {
-        askPrices: [],
-      },
-    };
-  }
-};
-
-export default function Home({ askPrices }: HomeProps) {
+export default function Home() {
   const { isLoaded: userLoaded, isSignedIn } = useUser();
 
   // Start fetching asap to cache
@@ -167,11 +114,13 @@ export default function Home({ askPrices }: HomeProps) {
           {isSignedIn && <CreatePostWizard />}
           <Feed />
           <div className="mt-4">
-            {stocks?.stocks.map((stock) => (
-              <div key={stock.symbol}>
-                {stock.symbol}: ${stock.purchasePrice?.toFixed(2)}
-              </div>
-            ))}
+            {stocks?.stocks.map((stock) => {
+              return (
+                <div key={stock.symbol}>
+                  {stock.symbol}: ${stock.purchasePrice?.toFixed(2)}
+                </div>
+              );
+            })}
           </div>
         </div>
       </main>
