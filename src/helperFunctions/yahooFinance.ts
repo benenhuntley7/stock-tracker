@@ -1,27 +1,27 @@
 import yahooFinance from "yahoo-finance2";
 
-export async function getQuote(symbols: string[]) {
+type QuoteResult = {
+  symbol: string;
+  longName: string | undefined;
+  regularMarketPrice: number | undefined;
+};
+
+export async function getQuote(symbols: string[]): Promise<QuoteResult[]> {
+  const results: QuoteResult[] = [];
+
   try {
-    const result = await Promise.all(
-      symbols.map(async (symbol: string) => {
-        const quote = await yahooFinance.quote(symbol);
-        console.log(`stockName: ${quote.longName}`);
-        return {
-          symbol,
-          longName: quote.longName,
-          regularMarketPrice: quote.regularMarketPrice,
-        };
-      }),
-    );
+    for (const symbol of symbols) {
+      const quote = await yahooFinance.quote(symbol);
 
-    return {
-      result,
-    };
-  } catch (err) {
-    console.error("Error fetching stock quote:", err);
+      results.push({
+        symbol,
+        longName: quote.longName,
+        regularMarketPrice: quote.regularMarketPrice,
+      });
+    }
 
-    return {
-      result: null,
-    };
+    return results;
+  } catch (error) {
+    return results; // If an error occurs, return the partial results
   }
 }

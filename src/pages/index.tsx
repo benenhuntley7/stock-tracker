@@ -11,16 +11,15 @@ import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
 
 import Image from "next/image";
-import { GetServerSideProps } from "next";
 
 import { LoadingPage } from "~/components/loadingSpinner";
-import { getQuote } from "~/helperFunctions/yahooFinance";
+import { TradeType } from "@prisma/client";
 
 type PostWithUser = RouterOutputs["posts"]["getAll"][number];
 
 const PostView = (props: PostWithUser) => {
   const { id, content, author, createdAt } = props;
-  console.log(createdAt);
+  //console.log(createdAt);
   return (
     <div className="flex gap-3 border-b border-slate-400 p-8" key={id}>
       <Image
@@ -44,7 +43,7 @@ const PostView = (props: PostWithUser) => {
 
 const CreatePostWizard = () => {
   const { user } = useUser();
-  console.log(user?.id);
+  // console.log(user?.id);
 
   if (!user) return null;
 
@@ -81,13 +80,42 @@ const Feed = () => {
   );
 };
 
+type CombinedType = {
+  id: string;
+  symbol: string;
+  brokerage: number;
+  purchasedAt: Date;
+  settledAt: Date;
+  tradeType: TradeType;
+  purchasePrice: number;
+  userId: string;
+  regularMarketPrice?: number; // Add this line for the new property
+  longName?: string;
+};
+
 export default function Home() {
   const { isLoaded: userLoaded, isSignedIn } = useUser();
 
-  // Start fetching asap to cache
-  api.posts.getAll.useQuery();
-  const { data: stocks, isLoading: stocksLoading } =
-    api.stocks.getAll.useQuery();
+  const { data: stocksData } = api.stocks.getAll.useQuery();
+  const stockPurchases = stocksData?.stocks;
+
+  const { data: quotesData } = api.stocks.getQuotes.useQuery(
+    stockPurchases?.map((stock) => stock.symbol) || [],
+  );
+
+  let combinedData: CombinedType[] | undefined;
+
+  if (
+    stockPurchases &&
+    stockPurchases?.length > 0 &&
+    quotesData &&
+    quotesData.length > 0
+  ) {
+    combinedData = stockPurchases.map((stock) => {
+      const quote = quotesData.find((q) => q.symbol === stock.symbol);
+      return quote ? { ...stock, ...quote } : stock;
+    });
+  }
 
   // Return empty div if both aren't loaded since user tends to load faster
   if (!userLoaded) return <div />;
@@ -114,13 +142,13 @@ export default function Home() {
           {isSignedIn && <CreatePostWizard />}
           <Feed />
           <div className="mt-4">
-            {stocks?.stocks.map((stock) => {
-              return (
-                <div key={stock.symbol}>
-                  {stock.symbol}: ${stock.purchasePrice?.toFixed(2)}
-                </div>
-              );
-            })}
+            {combinedData?.map((stock) => (
+              <div key={stock.symbol}>
+                {stock.symbol}: Purchase Price: $
+                {stock.purchasePrice?.toFixed(2)} | Regular Market Price: $
+                {stock.regularMarketPrice?.toFixed(2)}
+              </div>
+            ))}
           </div>
         </div>
       </main>
