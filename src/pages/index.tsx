@@ -69,7 +69,7 @@ const PostView = (props: PostWithUser) => {
 
 const CreatePostWizard = () => {
   const { user } = useUser();
-  //console.log(user?.id);
+  console.log(user?.id);
 
   if (!user) return null;
 
@@ -108,7 +108,10 @@ const Feed = () => {
 
 export const getServerSideProps: GetServerSideProps = async () => {
   try {
-    const symbols = purchases.map((purchase) => purchase.stock);
+    const { data: stocks } = api.stocks.getAll.useQuery();
+
+    const symbols = stocks?.stocks.map((stock) => stock.symbol) || [];
+
     const { result } = await getQuote(symbols);
 
     const askPrices = result!.map(
@@ -177,9 +180,9 @@ export default function Home({ askPrices }: HomeProps) {
           {isSignedIn && <CreatePostWizard />}
           <Feed />
           <div className="mt-4">
-            {askPrices.map((askPrice) => (
-              <div key={askPrice.symbol}>
-                {askPrice.longName}: ${askPrice.regularMarketPrice?.toFixed(2)}
+            {stocks?.stocks.map((stock) => (
+              <div key={stock.symbol}>
+                {stock.symbol}: ${stock.purchasePrice?.toFixed(2)}
               </div>
             ))}
           </div>

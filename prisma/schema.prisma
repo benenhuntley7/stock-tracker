@@ -20,13 +20,20 @@ model Post {
 
   @@index([authorId])
 }
-
 model Stock {
   id              String      @id @default(cuid())
-  stockCode       String
+  symbol          String
+  brokerage       Float
   purchasedAt     DateTime
+  settledAt       DateTime
+  tradeType       TradeType   // Use the custom enum type
   purchasePrice   Float
   userId          String
 
   @@index([userId])
+}
+
+enum TradeType {
+  BUY
+  SELL
 }
