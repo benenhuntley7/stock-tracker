@@ -93,11 +93,11 @@ type HomeProps = {
 
 const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
   try {
-    const stocksQuery = await api.stocks.getAll.useQuery();
-    const stocks = stocksQuery.data?.stocks || [];
+    const stocksQuery = api.stocks.getAll.useQuery();
+    const stocks = stocksQuery.data?.stocks ?? [];
 
     if (Array.isArray(stocks)) {
-      const symbols = stocks.map((stock) => stock.symbol) || [];
+      const symbols = stocks.map((stock) => stock.symbol) ?? [];
       const { result } = await getQuote(symbols);
 
       const askPrices: Stock[] = result!.map(
