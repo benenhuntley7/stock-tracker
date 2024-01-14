@@ -18,31 +18,6 @@ import { getQuote } from "~/helperFunctions/yahooFinance";
 
 type PostWithUser = RouterOutputs["posts"]["getAll"][number];
 
-type Purchase = {
-  id: number;
-  stock: string;
-  purchaseDate: string;
-  purchaseCost: number;
-  purchaseQty: number;
-};
-
-const purchases: Purchase[] = [
-  {
-    id: 1,
-    stock: "SYI.AX",
-    purchaseDate: "2021-02-01",
-    purchaseCost: 1.5,
-    purchaseQty: 20,
-  },
-  {
-    id: 2,
-    stock: "VAS.AX",
-    purchaseDate: "2022-02-01",
-    purchaseCost: 50,
-    purchaseQty: 20,
-  },
-];
-
 const PostView = (props: PostWithUser) => {
   const { id, content, author, createdAt } = props;
   console.log(createdAt);
@@ -139,15 +114,15 @@ export const getServerSideProps: GetServerSideProps = async () => {
   }
 };
 
-type HomeProps = {
+/* type HomeProps = {
   askPrices: Array<{
     symbol: string;
     longName: string;
     regularMarketPrice: number | null;
   }>;
-};
+}; */
 
-export default function Home({ askPrices }: HomeProps) {
+export default function Home() {
   const { isLoaded: userLoaded, isSignedIn } = useUser();
 
   // Start fetching asap to cache
