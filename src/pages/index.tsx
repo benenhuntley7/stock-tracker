@@ -81,25 +81,46 @@ const Feed = () => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async () => {
+type Stock = {
+  symbol: string;
+  longName: string;
+  regularMarketPrice: number;
+};
+
+type HomeProps = {
+  askPrices: Stock[];
+};
+
+const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
   try {
-    const { data: stocks } = api.stocks.getAll.useQuery();
+    const stocksQuery = await api.stocks.getAll.useQuery();
+    const stocks = stocksQuery.data?.stocks || [];
 
-    const symbols = stocks?.stocks.map((stock) => stock.symbol) || [];
+    if (Array.isArray(stocks)) {
+      const symbols = stocks.map((stock) => stock.symbol) || [];
+      const { result } = await getQuote(symbols);
 
-    const { result } = await getQuote(symbols);
+      const askPrices: Stock[] = result!.map(
+        ({ symbol, longName, regularMarketPrice }) => ({
+          symbol,
+          longName: longName ?? "",
+          regularMarketPrice: regularMarketPrice ?? 0,
+        }),
+      );
 
-    const askPrices = result!.map(
-      ({ symbol, longName, regularMarketPrice }) => ({
-        symbol,
-        longName: longName ?? "",
-        regularMarketPrice: regularMarketPrice ?? 0,
-      }),
-    );
+      return {
+        props: {
+          askPrices,
+        },
+      };
+    } else {
+      console.error("Stocks data is not an array:", stocksQuery.data);
+    }
 
+    // If there's an error or stocks are not an array, return an empty array for askPrices
     return {
       props: {
-        askPrices,
+        askPrices: [],
       },
     };
   } catch (err) {
@@ -108,21 +129,12 @@ export const getServerSideProps: GetServerSideProps = async () => {
     return {
       props: {
         askPrices: [],
-        stocks: [],
       },
     };
   }
 };
 
-/* type HomeProps = {
-  askPrices: Array<{
-    symbol: string;
-    longName: string;
-    regularMarketPrice: number | null;
-  }>;
-}; */
-
-export default function Home() {
+export default function Home({ askPrices }: HomeProps) {
   const { isLoaded: userLoaded, isSignedIn } = useUser();
 
   // Start fetching asap to cache
