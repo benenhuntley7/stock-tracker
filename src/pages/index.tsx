@@ -100,7 +100,7 @@ export default function Home() {
   const stockPurchases = stocksData?.stocks;
 
   const { data: quotesData } = api.stocks.getQuotes.useQuery(
-    stockPurchases?.map((stock) => stock.symbol) || [],
+    stockPurchases?.map((stock) => stock.symbol) ?? [],
   );
 
   let combinedData: CombinedType[] | undefined;
