@@ -80,28 +80,28 @@ const Feed = () => {
   );
 };
 
-type CombinedType = {
-  id: string;
-  symbol: string;
-  brokerage: number;
-  purchasedAt: Date;
-  settledAt: Date;
-  tradeType: TradeType;
-  purchasePrice: number;
-  userId: string;
-  regularMarketPrice?: number; // Add this line for the new property
-  longName?: string;
-};
+const StockData = () => {
+  type CombinedType = {
+    id: string;
+    symbol: string;
+    brokerage: number;
+    purchasedAt: Date;
+    settledAt: Date;
+    tradeType: TradeType;
+    purchasePrice: number;
+    userId: string;
+    regularMarketPrice?: number; // Add this line for the new property
+    longName?: string;
+  };
 
-export default function Home() {
-  const { isLoaded: userLoaded, isSignedIn } = useUser();
-
-  const { data: stocksData } = api.stocks.getAll.useQuery();
+  const { data: stocksData, isLoading: stockDataLoading } =
+    api.stocks.getAll.useQuery();
   const stockPurchases = stocksData?.stocks;
 
-  const { data: quotesData } = api.stocks.getQuotes.useQuery(
-    stockPurchases?.map((stock) => stock.symbol) ?? [],
-  );
+  const { data: quotesData, isLoading: quoteDataLoading } =
+    api.stocks.getQuotes.useQuery(
+      stockPurchases?.map((stock) => stock.symbol) ?? [],
+    );
 
   let combinedData: CombinedType[] | undefined;
 
@@ -116,6 +116,23 @@ export default function Home() {
       return quote ? { ...stock, ...quote } : stock;
     });
   }
+
+  if (stockDataLoading || quoteDataLoading) return <LoadingPage />;
+
+  return (
+    <div className="mt-4">
+      {combinedData?.map((stock) => (
+        <div key={stock.symbol}>
+          {stock.symbol}: Purchase Price: ${stock.purchasePrice?.toFixed(2)} |
+          Regular Market Price: ${stock.regularMarketPrice?.toFixed(2)}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default function Home() {
+  const { isLoaded: userLoaded, isSignedIn } = useUser();
 
   // Return empty div if both aren't loaded since user tends to load faster
   if (!userLoaded) return <div />;
@@ -141,15 +158,7 @@ export default function Home() {
           </div>
           {isSignedIn && <CreatePostWizard />}
           <Feed />
-          <div className="mt-4">
-            {combinedData?.map((stock) => (
-              <div key={stock.symbol}>
-                {stock.symbol}: Purchase Price: $
-                {stock.purchasePrice?.toFixed(2)} | Regular Market Price: $
-                {stock.regularMarketPrice?.toFixed(2)}
-              </div>
-            ))}
-          </div>
+          <StockData />
         </div>
       </main>
     </>

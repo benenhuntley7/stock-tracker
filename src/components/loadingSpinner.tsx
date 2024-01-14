@@ -24,7 +24,7 @@ const LoadingSpinner = () => {
 
 export const LoadingPage = () => {
   return (
-    <div className="fixed left-0 top-0 flex h-screen w-screen items-center justify-center">
+    <div className="flex items-center justify-center border-b border-slate-400">
       <LoadingSpinner />
     </div>
   );
