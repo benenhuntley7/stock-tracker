@@ -17,7 +17,7 @@ export const stocksRouter = createTRPCRouter({
   }),
   getQuotes: privateProcedure.input(z.array(z.string())).query(async (opts) => {
     // Ensure input is not undefined (handled by z.array(z.string()))
-    const symbols = opts.input!;
+    const symbols = opts.input;
 
     // Make a call to a third-party API here
     const quotes = await getQuote(symbols);
