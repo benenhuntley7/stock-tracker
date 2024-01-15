@@ -25,15 +25,21 @@ export const stocksRouter = createTRPCRouter({
     return quotes;
   }),
   getHistory: privateProcedure
-    .input(z.array(z.string()))
+    .input(
+      z.array(
+        z.object({
+          symbol: z.string(),
+          purchasedAt: z.date(), // You may need to adjust the type based on the actual type of purchasedAt
+        }),
+      ),
+    )
     .query(async (opts) => {
       // Ensure input is not undefined (handled by z.array(z.string()))
-      const symbols = opts.input;
-
+      const input = opts.input;
       // Make a call to a third-party API here
-      const quotes = await getHistory(symbols);
+      const history = getHistory(input);
 
       // Return the fetched data
-      return quotes;
+      return history;
     }),
 });

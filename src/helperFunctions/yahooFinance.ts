@@ -26,18 +26,18 @@ export async function getQuote(symbols: string[]): Promise<QuoteResult[]> {
   }
 }
 
-type HistoryResult = {
+interface SymbolAndPurchasedAt {
   symbol: string;
-  date: Date;
-  price: number;
-};
-export async function getHistory(symbols: string[]): Promise<HistoryResult[]> {
-  // Assuming you will fetch data from some source, for now, let's return a dummy data.
-  const dummyData: HistoryResult[] = symbols.map((symbol) => ({
-    symbol: symbol,
-    date: new Date(Date.now()),
-    price: 2,
-  }));
-  // Simulating an asynchronous operation with a delay
-  return dummyData;
+  purchasedAt: Date; // Adjust the type based on the actual type of purchasedAt
+}
+
+export async function getHistory(inputs: SymbolAndPurchasedAt[]): Promise<any> {
+  let results = [];
+
+  for (const { symbol, purchasedAt } of inputs) {
+    const history = await yahooFinance.chart(symbol, { period1: purchasedAt });
+    results.push(history);
+  }
+
+  return results;
 }

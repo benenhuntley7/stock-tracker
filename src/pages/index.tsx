@@ -19,7 +19,6 @@ type PostWithUser = RouterOutputs["posts"]["getAll"][number];
 
 const PostView = (props: PostWithUser) => {
   const { id, content, author, createdAt } = props;
-  //console.log(createdAt);
   return (
     <div className="flex gap-3 border-b border-slate-400 p-8" key={id}>
       <Image
@@ -81,6 +80,11 @@ const Feed = () => {
 };
 
 const StockData = () => {
+  type StockHistory = {
+    date: Date;
+    price: number;
+  };
+
   type CombinedType = {
     id: string;
     symbol: string;
@@ -94,6 +98,7 @@ const StockData = () => {
     regularMarketPrice?: number; // Add this line for the new property
     longName?: string;
     growth?: number;
+    history?: StockHistory[];
   };
 
   const { data: stocksData, isLoading: stockDataLoading } =
@@ -103,6 +108,14 @@ const StockData = () => {
   const { data: quotesData, isLoading: quoteDataLoading } =
     api.stocks.getQuotes.useQuery(
       stockPurchases?.map((stock) => stock.symbol) ?? [],
+    );
+
+  const { data: stockHistory, isLoading: stockHistoryLoading } =
+    api.stocks.getHistory.useQuery(
+      stockPurchases?.map((stock) => ({
+        symbol: stock.symbol,
+        purchasedAt: new Date(stock.purchasedAt),
+      })) ?? [],
     );
 
   let combinedData: CombinedType[] | undefined;
