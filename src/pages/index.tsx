@@ -43,7 +43,7 @@ const PostView = (props: PostWithUser) => {
 
 const CreatePostWizard = () => {
   const { user } = useUser();
-  // console.log(user?.id);
+  console.log(user?.id);
 
   if (!user) return null;
 
@@ -89,13 +89,15 @@ const StockData = () => {
     settledAt: Date;
     tradeType: TradeType;
     purchasePrice: number;
+    purchaseQty: number;
     userId: string;
     regularMarketPrice?: number; // Add this line for the new property
     longName?: string;
+    growth?: number;
   };
 
   const { data: stocksData, isLoading: stockDataLoading } =
-    api.stocks.getAll.useQuery();
+    api.stocks.getAllPurchases.useQuery();
   const stockPurchases = stocksData?.stocks;
 
   const { data: quotesData, isLoading: quoteDataLoading } =
@@ -113,7 +115,10 @@ const StockData = () => {
   ) {
     combinedData = stockPurchases.map((stock) => {
       const quote = quotesData.find((q) => q.symbol === stock.symbol);
-      return quote ? { ...stock, ...quote } : stock;
+      const growth =
+        ((quote?.regularMarketPrice ?? 0) - stock.purchasePrice) *
+        stock.purchaseQty;
+      return quote ? { ...stock, ...quote, growth } : stock;
     });
   }
 
@@ -124,7 +129,8 @@ const StockData = () => {
       {combinedData?.map((stock) => (
         <div key={stock.symbol}>
           {stock.symbol}: Purchase Price: ${stock.purchasePrice?.toFixed(2)} |
-          Regular Market Price: ${stock.regularMarketPrice?.toFixed(2)}
+          Market Price: ${stock.regularMarketPrice?.toFixed(2)} | Growth: $
+          {stock.growth?.toFixed(2)}
         </div>
       ))}
     </div>

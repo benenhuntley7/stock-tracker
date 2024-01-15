@@ -28,6 +28,7 @@ model Stock {
   settledAt       DateTime
   tradeType       TradeType   // Use the custom enum type
   purchasePrice   Float
+  purchaseQty     Int
   userId          String
 
   @@index([userId])

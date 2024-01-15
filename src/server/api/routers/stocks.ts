@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getQuote } from "~/helperFunctions/yahooFinance";
 
 export const stocksRouter = createTRPCRouter({
-  getAll: privateProcedure.query(async ({ ctx }) => {
+  getAllPurchases: privateProcedure.query(async ({ ctx }) => {
     const userId = ctx.userId;
 
     if (!userId) {
@@ -11,7 +11,6 @@ export const stocksRouter = createTRPCRouter({
     }
 
     const stocks = await ctx.db.stock.findMany({ where: { userId: userId } });
-    // You can add more logic to transform or filter stocks as needed
 
     return { stocks };
   }),
