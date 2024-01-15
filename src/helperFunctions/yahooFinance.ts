@@ -32,7 +32,9 @@ interface SymbolAndPurchasedAt {
   purchasedAt: Date; // Adjust the type based on the actual type of purchasedAt
 }
 
-export async function getHistory(inputs: SymbolAndPurchasedAt[]): Promise<any> {
+export async function getHistory(
+  inputs: SymbolAndPurchasedAt[],
+): Promise<unknown> {
   const results: ChartResultArray[] = [];
 
   for (const { symbol, purchasedAt } of inputs) {
