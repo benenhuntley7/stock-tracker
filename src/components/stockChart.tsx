@@ -23,7 +23,6 @@ export default function LinePlot({
   const gx = useRef<SVGGElement>(null);
   const gy = useRef<SVGGElement>(null);
 
-  // Add a check for data existence and non-empty
   const extent = data && data.length > 0 ? d3.extent(data) : [0, 0];
 
   const x = d3.scaleLinear(

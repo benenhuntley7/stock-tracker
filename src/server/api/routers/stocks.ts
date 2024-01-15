@@ -1,6 +1,6 @@
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import { z } from "zod";
-import { getQuote } from "~/helperFunctions/yahooFinance";
+import { getHistory, getQuote } from "~/helperFunctions/yahooFinance";
 
 export const stocksRouter = createTRPCRouter({
   getAllPurchases: privateProcedure.query(async ({ ctx }) => {
@@ -24,4 +24,16 @@ export const stocksRouter = createTRPCRouter({
     // Return the fetched data
     return quotes;
   }),
+  getHistory: privateProcedure
+    .input(z.array(z.string()))
+    .query(async (opts) => {
+      // Ensure input is not undefined (handled by z.array(z.string()))
+      const symbols = opts.input;
+
+      // Make a call to a third-party API here
+      const quotes = await getHistory(symbols);
+
+      // Return the fetched data
+      return quotes;
+    }),
 });
