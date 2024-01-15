@@ -39,19 +39,30 @@ export default function LinePlot({
     .x((d, i) => x(i))
     .y((d) => y(d));
 
-  useEffect(() => void d3.select(gx.current!).call(d3.axisBottom(x)), [gx, x]);
-  useEffect(() => void d3.select(gy.current!).call(d3.axisLeft(y)), [gy, y]);
+  useEffect(() => {
+    if (gx.current) {
+      d3.select(gx.current).call(d3.axisBottom(x));
+    }
+  }, [gx, x]);
+
+  useEffect(() => {
+    if (gy.current) {
+      d3.select(gy.current).call(d3.axisLeft(y));
+    }
+  }, [gy, y]);
 
   return (
     <svg width={width} height={height}>
       <g ref={gx} transform={`translate(0,${height - marginBottom})`} />
       <g ref={gy} transform={`translate(${marginLeft},0)`} />
-      <path
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        d={line!(data) as string}
-      />
+      {line && (
+        <path
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          d={line(data) as string}
+        />
+      )}
       <g fill="white" stroke="currentColor" strokeWidth="1.5">
         {data.map((d, i) => (
           <circle key={i} cx={x(i)} cy={y(d)} r="2.5" />
