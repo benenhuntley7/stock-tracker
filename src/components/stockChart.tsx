@@ -50,7 +50,7 @@ export default function LinePlot({
         fill="none"
         stroke="currentColor"
         strokeWidth="1.5"
-        d={line(data!) as string}
+        d={line!(data) as string}
       />
       <g fill="white" stroke="currentColor" strokeWidth="1.5">
         {data.map((d, i) => (
