@@ -1,3 +1,4 @@
+import type { ChartResultArray } from "node_modules/yahoo-finance2/dist/esm/src/modules/chart";
 import yahooFinance from "yahoo-finance2";
 
 type QuoteResult = {
@@ -32,7 +33,7 @@ interface SymbolAndPurchasedAt {
 }
 
 export async function getHistory(inputs: SymbolAndPurchasedAt[]): Promise<any> {
-  let results = [];
+  const results: ChartResultArray[] = [];
 
   for (const { symbol, purchasedAt } of inputs) {
     const history = await yahooFinance.chart(symbol, { period1: purchasedAt });
